@@ -13,9 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        /* call seeder list */
+        // runメソッド内に追加して順番を入れ替える
+        $this->call(UsersTableSeeder::class);
         $this->call(FoldersTableSeeder::class);
-        // runメソッド内に追加する
         $this->call(TasksTableSeeder::class);
     }
 }

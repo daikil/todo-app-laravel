@@ -3,7 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\HomeController;
+use Illuminate\Support\Facades\Auth;
 
+/* home page */
+Route::get('/', [HomeController::class,"index"])->name('home');
 /* index page */
 Route::get("/folders/{id}/tasks", [TaskController::class, "index"])->name("tasks.index");
 /* folders new create page */
@@ -24,3 +28,5 @@ Route::post('/folders/{id}/tasks/{task_id}/edit', [TaskController::class,"edit"]
 /* tasks new delete page */
 Route::get('/folders/{id}/tasks/{task_id}/delete', [TaskController::class,"showDeleteForm"])->name('tasks.delete');
 Route::post('/folders/{id}/tasks/{task_id}/delete', [TaskController::class,"delete"]);
+
+Auth::routes();
