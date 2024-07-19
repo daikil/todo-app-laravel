@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Folder;
 use App\Http\Requests\CreateFolder;
+use App\Http\Requests\EditFolder;
 
 class FolderController extends Controller
 {
@@ -20,7 +21,7 @@ class FolderController extends Controller
     {
         /* フォルダの新規作成ページを呼び出す */
         // view('遷移先のbladeファイル名');
-        return view('folders/create');
+        return view('folders.create');
     }
 
     /**
@@ -29,7 +30,6 @@ class FolderController extends Controller
      *  POST /folders/create
      *  @param CreateFolder $request （Requestクラスの機能は引き継がれる）
      *  @return RedirectResponse
-     *  @var App\Http\Requests\CreateFolder
      */
     public function create(CreateFolder $request): RedirectResponse
     {
@@ -49,6 +49,83 @@ class FolderController extends Controller
         // route():ルートPathを指定する関数
         return redirect()->route('tasks.index', [
             'id' => $folder->id,
+        ]);
+    }
+
+    /**
+     *  【フォルダ編集ページの表示機能】
+     *
+     *  GET /folders/{id}/edit
+     *  @param int $id
+     *  @return View
+     */
+    public function showEditForm(int $id): View
+    {
+        $folder = Folder::find($id);
+
+        return view('folders.edit', [
+            'folder_id' => $folder->id,
+            'folder_title' => $folder->title,
+        ]);
+    }
+
+    /**
+     *  【フォルダの編集機能】
+     *
+     *  POST /folders/{id}/edit
+     *  @param int $id
+     *  @param EditFolder $request
+     *  @return RedirectResponse
+     */
+    public function edit(int $id, EditFolder $request): RedirectResponse
+    {
+        $folder = Folder::find($id);
+
+        $folder->title = $request->title;
+        $folder->save();
+
+        return redirect()->route('tasks.index', [
+            'id' => $folder->id,
+        ]);
+    }
+
+    /**
+     *  【フォルダ削除ページの表示機能】
+     *  機能：フォルダIDをフォルダ編集ページに渡して表示する
+     *
+     *  GET /folders/{id}/delete
+     *  @param int $id
+     *  @return View
+     */
+    public function showDeleteForm(int $id): View
+    {
+        $folder = Folder::find($id);
+
+        return view('folders/delete', [
+            'folder_id' => $folder->id,
+            'folder_title' => $folder->title,
+        ]);
+    }
+
+    /**
+     *  【フォルダの削除機能】
+     *  機能：フォルダが削除されたらDBから削除し、フォルダ一覧にリダイレクトする
+     *
+     *  POST /folders/{id}/delete
+     *  @param int $id
+     *  @return RedirectResponse
+     */
+    public function delete(int $id): RedirectResponse
+    {
+        $folder = Folder::find($id);
+
+        $folder->tasks()->delete();
+        $folder->delete();
+
+        $folder = Folder::first();
+
+        return redirect()->route('tasks.index', [
+            'id' => $folder->id
         ]);
     }
 }
