@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Folder;
 // タスククラスを名前空間でインポートする
 use App\Models\Task;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class TaskController extends Controller
@@ -21,8 +22,9 @@ class TaskController extends Controller
      */
     public function showCreateForm(int $id): View
     {
+        $folder = Auth::user()->folders()->findOrFail($id);
         return view('tasks.create', [
-            'folder_id' => $id
+            'folder_id' => $folder->id
         ]);
     }
 
@@ -37,8 +39,7 @@ class TaskController extends Controller
     public function create(int $id, CreateTask $request): RedirectResponse
     {
         /* ユーザーによって選択されたフォルダを取得する */
-        // find()：一行分のデータを取得する関数
-        $folder = Folder::find($id);
+        $folder = Auth::user()->folders()->findOrFail($id);
 
         /* 新規作成のタスク（タイトル）をDBに書き込む処理 */
         // タスクモデルのインスタンスを作成する
@@ -104,9 +105,10 @@ class TaskController extends Controller
      */
     public function showEditForm(int $id, int $task_id): View
     {
-        $task = Task::find($task_id);
+        $folder = Auth::user()->folders()->findOrFail($id);
+        $task = $folder->tasks()->findOrFail($task_id);
 
-        return view('tasks/edit', [
+        return view('tasks.edit', [
             'task' => $task,
         ]);
     }
@@ -123,7 +125,8 @@ class TaskController extends Controller
      */
     public function edit(int $id, int $task_id, EditTask $request): RedirectResponse
     {
-        $task = Task::find($task_id);
+        $folder = Auth::user()->folders()->findOrFail($id);
+        $task = $folder->tasks()->findOrFail($task_id);
 
         $task->title = $request->title;
         $task->status = $request->status;
@@ -145,7 +148,8 @@ class TaskController extends Controller
      */
     public function showDeleteForm(int $id, int $task_id): View
     {
-        $task = Task::find($task_id);
+        $folder = Auth::user()->folders()->findOrFail($id);
+        $task = $folder->tasks()->findOrFail($task_id);
 
         return view('tasks/delete', [
             'task' => $task,
@@ -162,7 +166,8 @@ class TaskController extends Controller
      */
     public function delete(int $id, int $task_id): RedirectResponse
     {
-        $task = Task::find($task_id);
+        $folder = Auth::user()->folders()->findOrFail($id);
+        $task = $folder->tasks()->findOrFail($task_id);
 
         $task->delete();
 

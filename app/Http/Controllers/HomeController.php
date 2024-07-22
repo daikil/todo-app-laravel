@@ -2,19 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     /**
-     *  ホームページを表示するコントローラー
-     *
+     * Show the application dashboard.
+     *  ホームページを表示する
      *  GET /
-     *  @return View
+     * @return RedirectResponse | View
      */
-    public function index(): View
+    public function index(): RedirectResponse | View
     {
-        return view('home');
+        $folder = Auth::user()->folders()->first();
+
+        if (is_null($folder)) {
+            return view('home');
+        }
+
+        return redirect()->route('tasks.index', [
+            'id' => $folder->id,
+        ]);
     }
 }

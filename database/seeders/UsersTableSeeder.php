@@ -32,5 +32,12 @@ class UsersTableSeeder extends Seeder
             // 現在の日時を取得してupdated_atに更新日として代入する
             'updated_at' => Carbon::now(),
         ]);
+        DB::table('users')->insert([
+            'name' => 'test2',
+            'email' => 'test2345@email.com',
+            'password' => bcrypt('test2345'),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
     }
 }

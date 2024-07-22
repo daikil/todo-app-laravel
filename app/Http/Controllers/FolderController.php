@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use App\Models\Folder;
 use App\Http\Requests\CreateFolder;
 use App\Http\Requests\EditFolder;
+use Illuminate\Support\Facades\Auth;
 
 class FolderController extends Controller
 {
@@ -38,8 +39,8 @@ class FolderController extends Controller
         $folder = new Folder();
         // タイトルに入力値を代入する
         $folder->title = $request->title;
-        // インスタンスの状態をデータベースに書き込む
-        $folder->save();
+        // （ログイン）ユーザーに紐づけて保存する
+        Auth::user()->folders()->save($folder);
 
         /* タスク一覧ページにリダイレクトする */
         // リダイレクト：別URLへの転送（リクエストされたURLとは別のURLに直ちに再リクエストさせます）
@@ -61,8 +62,7 @@ class FolderController extends Controller
      */
     public function showEditForm(int $id): View
     {
-        $folder = Folder::find($id);
-
+        $folder = Auth::user()->folders()->findOrFail($id);
         return view('folders.edit', [
             'folder_id' => $folder->id,
             'folder_title' => $folder->title,
@@ -79,7 +79,7 @@ class FolderController extends Controller
      */
     public function edit(int $id, EditFolder $request): RedirectResponse
     {
-        $folder = Folder::find($id);
+        $folder = Auth::user()->folders()->findOrFail($id);
 
         $folder->title = $request->title;
         $folder->save();
@@ -99,7 +99,7 @@ class FolderController extends Controller
      */
     public function showDeleteForm(int $id): View
     {
-        $folder = Folder::find($id);
+        $folder = Auth::user()->folders()->findOrFail($id);
 
         return view('folders/delete', [
             'folder_id' => $folder->id,
@@ -117,7 +117,7 @@ class FolderController extends Controller
      */
     public function delete(int $id): RedirectResponse
     {
-        $folder = Folder::find($id);
+        $folder = Auth::user()->folders()->findOrFail($id);
 
         $folder->tasks()->delete();
         $folder->delete();
