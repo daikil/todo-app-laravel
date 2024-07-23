@@ -16,13 +16,13 @@ class TaskController extends Controller
     /**
      *  【タスク作成ページの表示機能】
      *
-     *  GET /folders/{id}/tasks/create
-     *  @param int $id
+     *  GET /folders/{folder}/tasks/create
+     *  @param Folder $folder
      *  @return View
      */
-    public function showCreateForm(int $id): View
+    public function showCreateForm(Folder $folder): View
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
         return view('tasks.create', [
             'folder_id' => $folder->id
         ]);
@@ -31,15 +31,15 @@ class TaskController extends Controller
     /**
      *  【タスクの作成機能】
      *
-     *  POST /folders/{id}/tasks/create
-     *  @param int $id
+     *  POST /folders/{folder}/tasks/create
+     *  @param Folder $folder
      *  @param CreateTask $request
      *  @return RedirectResponse
      */
-    public function create(int $id, CreateTask $request): RedirectResponse
+    public function create(Folder $folder, CreateTask $request): RedirectResponse
     {
         /* ユーザーによって選択されたフォルダを取得する */
-        $folder = Auth::user()->folders()->findOrFail($id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
 
         /* 新規作成のタスク（タイトル）をDBに書き込む処理 */
         // タスクモデルのインスタンスを作成する
@@ -58,27 +58,21 @@ class TaskController extends Controller
         // redirect():リダイレクトを実施する関数
         // route():ルートPathを指定する関数
         return redirect()->route('tasks.index', [
-            'id' => $folder->id,
+            'folder' => $folder->id,
         ]);
     }
 
     /**
      *  【タスク一覧ページの表示機能】
      *
-     *  GET /folders/{id}/tasks
-     *  @param int $id
+     *  GET /folders/{folder}/tasks
+     *  @param Folder $folder
      *  @return View
      */
-    public function index(int $id): View
+    public function index(Folder $folder): View
     {
-        /* Folderモデルの全てのデータをDBから取得する */
-        // all()：全てのデータを取得する関数
-        $folders = Folder::all();
-
-        /* ユーザーによって選択されたフォルダを取得する */
-        // find()：一行分のデータを取得する関数
-        $folder = Folder::find($id);
-
+        $user = auth()->user();
+        $folders = $user->folders()->get();
         /* ユーザーによって選択されたフォルダに紐づくタスクを取得する */
         // where(カラム名,カラムに対して比較する値)：特定の条件を指定する関数 ※一致する場合の条件 `'='` を省略形で記述しています
         // get()：値を取得する関数（この場合はwhere関数で生成されたSQL文を発行して値を取得する）
@@ -98,15 +92,15 @@ class TaskController extends Controller
      *  【タスク編集ページの表示機能】
      *  機能：タスクIDをフォルダ編集ページに渡して表示する
      *
-     *  GET /folders/{id}/tasks/{task_id}/edit
-     *  @param int $id
-     *  @param int $task_id
+     *  GET /folders/{folder}/tasks/{task}/edit
+     *  @param Folder $folder
+     *  @param Task $task
      *  @return View
      */
-    public function showEditForm(int $id, int $task_id): View
+    public function showEditForm(Folder $folder, Task $task): View
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
-        $task = $folder->tasks()->findOrFail($task_id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
+        $task = $folder->tasks()->findOrFail($task->id);
 
         return view('tasks.edit', [
             'task' => $task,
@@ -117,16 +111,16 @@ class TaskController extends Controller
      *  【タスクの編集機能】
      *  機能：タスクが編集されたらDBを更新処理をしてタスク一覧にリダイレクトする
      *
-     *  POST /folders/{id}/tasks/{task_id}/edit
-     *  @param int $id
-     *  @param int $task_id
+     *  POST /folders/{folder}/tasks/{task}/edit
+     *  @param Folder $folder
+     *  @param Task $task
      *  @param EditTask $request
      *  @return RedirectResponse
      */
-    public function edit(int $id, int $task_id, EditTask $request): RedirectResponse
+    public function edit(Folder $folder, Task $task, EditTask $request): RedirectResponse
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
-        $task = $folder->tasks()->findOrFail($task_id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
+        $task = $folder->tasks()->findOrFail($task->id);
 
         $task->title = $request->title;
         $task->status = $request->status;
@@ -134,22 +128,22 @@ class TaskController extends Controller
         $task->save();
 
         return redirect()->route('tasks.index', [
-            'id' => $task->folder_id,
+            'folder' => $task->folder_id,
         ]);
     }
 
     /**
      *  【タスク削除ページの表示機能】
      *
-     *  GET /folders/{id}/tasks/{task_id}/delete
-     *  @param int $id
-     *  @param int $task_id
+     *  GET /folders/{folder}/tasks/{task}/delete
+     *  @param Folder $folder
+     *  @param Task $task
      *  @return View
      */
-    public function showDeleteForm(int $id, int $task_id): View
+    public function showDeleteForm(Folder $folder, Task $task): View
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
-        $task = $folder->tasks()->findOrFail($task_id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
+        $task = $folder->tasks()->findOrFail($task->id);
 
         return view('tasks/delete', [
             'task' => $task,
@@ -159,20 +153,20 @@ class TaskController extends Controller
     /**
      *  【タスクの削除機能】
      *
-     *  POST /folders/{id}/tasks/{task_id}/delete
-     *  @param int $id
-     *  @param int $task_id
+     *  POST /folders/{folder}/tasks/{task}/delete
+     *  @param Folder $folder
+     *  @param Task $task
      *  @return RedirectResponse
      */
-    public function delete(int $id, int $task_id): RedirectResponse
+    public function delete(Folder $folder, Task $task): RedirectResponse
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
-        $task = $folder->tasks()->findOrFail($task_id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
+        $task = $folder->tasks()->findOrFail($task->id);
 
         $task->delete();
 
         return redirect()->route('tasks.index', [
-            'id' => $id
+            'folder' => $task->folder_id
         ]);
     }
 

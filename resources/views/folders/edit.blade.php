@@ -25,7 +25,7 @@
                                 </ul>
                             </div>
                         @endif
-                        <form action="{{ route('folders.edit', ['id' => $folder_id]) }}" method="post">
+                        <form action="{{ route('folders.edit', ['folder' => $folder_id]) }}" method="post">
                             @csrf
                             <div class="mb-3">
                                 <label for="title" class="form-label">フォルダ名</label>

@@ -25,7 +25,7 @@
                                 </ul>
                             </div>
                         @endif
-                        <form action="{{ route('tasks.create', ['id' => $folder_id]) }}" method="POST">
+                        <form action="{{ route('tasks.create', ['folder' => $folder_id]) }}" method="POST">
                             @csrf
                             <div class="mb-3">
                                 <label for="title" class="form-label">タイトル</label>

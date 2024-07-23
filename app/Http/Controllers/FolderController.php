@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Folder;
 use App\Http\Requests\CreateFolder;
@@ -49,20 +48,20 @@ class FolderController extends Controller
         // redirect():リダイレクトを実施する関数
         // route():ルートPathを指定する関数
         return redirect()->route('tasks.index', [
-            'id' => $folder->id,
+            'folder' => $folder->id,
         ]);
     }
 
     /**
      *  【フォルダ編集ページの表示機能】
      *
-     *  GET /folders/{id}/edit
-     *  @param int $id
+     *  GET /folders/{folder}/edit
+     *  @param Folder $folder
      *  @return View
      */
-    public function showEditForm(int $id): View
+    public function showEditForm(Folder $folder): View
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
         return view('folders.edit', [
             'folder_id' => $folder->id,
             'folder_title' => $folder->title,
@@ -72,20 +71,20 @@ class FolderController extends Controller
     /**
      *  【フォルダの編集機能】
      *
-     *  POST /folders/{id}/edit
-     *  @param int $id
+     *  POST /folders/{folder}/edit
+     *  @param Folder $folder
      *  @param EditFolder $request
      *  @return RedirectResponse
      */
-    public function edit(int $id, EditFolder $request): RedirectResponse
+    public function edit(Folder $folder, EditFolder $request): RedirectResponse
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
 
         $folder->title = $request->title;
         $folder->save();
 
         return redirect()->route('tasks.index', [
-            'id' => $folder->id,
+            'folder' => $folder->id,
         ]);
     }
 
@@ -93,13 +92,13 @@ class FolderController extends Controller
      *  【フォルダ削除ページの表示機能】
      *  機能：フォルダIDをフォルダ編集ページに渡して表示する
      *
-     *  GET /folders/{id}/delete
-     *  @param int $id
+     *  GET /folders/{folder}/delete
+     *  @param Folder $folder
      *  @return View
      */
-    public function showDeleteForm(int $id): View
+    public function showDeleteForm(Folder $folder): View
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
 
         return view('folders/delete', [
             'folder_id' => $folder->id,
@@ -111,13 +110,13 @@ class FolderController extends Controller
      *  【フォルダの削除機能】
      *  機能：フォルダが削除されたらDBから削除し、フォルダ一覧にリダイレクトする
      *
-     *  POST /folders/{id}/delete
-     *  @param int $id
+     *  POST /folders/{folder}/delete
+     *  @param Folder $folder
      *  @return RedirectResponse
      */
-    public function delete(int $id): RedirectResponse
+    public function delete(Folder $folder): RedirectResponse
     {
-        $folder = Auth::user()->folders()->findOrFail($id);
+        $folder = Auth::user()->folders()->findOrFail($folder->id);
 
         $folder->tasks()->delete();
         $folder->delete();
@@ -125,7 +124,7 @@ class FolderController extends Controller
         $folder = Folder::first();
 
         return redirect()->route('tasks.index', [
-            'id' => $folder->id
+            'folder' => $folder->id
         ]);
     }
 }
